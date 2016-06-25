@@ -111,14 +111,12 @@ public class SeqScan implements DbIterator {
 
         for (int i = 0; i < td.numFields(); i++) {
             typeAr[i] = td.getFieldType(i);
-            String field = td.getFieldName(i);
-            if (field == null) {
-                field = "null";
+            String fieldName = td.getFieldName(i);
+            if (fieldName == null) {
+                fieldName = "null";
             }
-            field = prefix + "." + field;
-
+            fieldAr[i] = prefix + "." + fieldName;
         }
-
         return new TupleDesc(typeAr, fieldAr);
     }
 

@@ -10,6 +10,10 @@ public class Delete extends Operator {
 
     private static final long serialVersionUID = 1L;
 
+    private final TransactionId tid;
+    private DbIterator child;
+    private boolean deleted = false;
+
     /**
      * Constructor specifying the transaction that this delete belongs to as
      * well as the child to read from.
@@ -21,23 +25,30 @@ public class Delete extends Operator {
      */
     public Delete(TransactionId t, DbIterator child) {
         // some code goes here
+        this.tid = t;
+        this.child = child;
     }
 
     public TupleDesc getTupleDesc() {
         // some code goes here
-        return null;
+        return Utility.getTupleDesc(1);
     }
 
     public void open() throws DbException, TransactionAbortedException {
         // some code goes here
+        super.open();
+        child.open();
     }
 
     public void close() {
         // some code goes here
+        super.close();
+        child.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
         // some code goes here
+        // nothing
     }
 
     /**
@@ -51,18 +62,30 @@ public class Delete extends Operator {
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
         // some code goes here
+        if (!deleted) {
+            int count = 0;
+            while (child.hasNext()) {
+                Tuple toDelete = child.next();
+                DbFile dbFile = Database.getCatalog().getDatabaseFile(toDelete.getRecordId().getPageId().getTableId());
+                dbFile.deleteTuple(tid, toDelete);
+                count += 1;
+            }
+            deleted = true;
+            return Utility.getTuple(new int[]{count}, 1);
+        }
         return null;
     }
 
     @Override
     public DbIterator[] getChildren() {
         // some code goes here
-        return null;
+        return new DbIterator[]{child};
     }
 
     @Override
     public void setChildren(DbIterator[] children) {
         // some code goes here
+        this.child = children[0];
     }
 
 }

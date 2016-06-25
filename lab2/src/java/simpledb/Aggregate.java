@@ -10,12 +10,17 @@ import java.util.*;
 public class Aggregate extends Operator {
 
     private static final long serialVersionUID = 1L;
-
+    private Aggregator aggr;
+    private DbIterator child;
+    private final int afield;
+    private final int gfield;
+    private final Aggregator.Op aop;
+    private DbIterator it;
     /**
      * Constructor.
      * 
      * Implementation hint: depending on the type of afield, you will want to
-     * construct an {@link IntAggregator} or {@link StringAggregator} to help
+     * construct an {@link IntegerAggregator} or {@link StringAggregator} to help
      * you with your implementation of readNext().
      * 
      * 
@@ -31,6 +36,11 @@ public class Aggregate extends Operator {
      */
     public Aggregate(DbIterator child, int afield, int gfield, Aggregator.Op aop) {
 	// some code goes here
+        this.afield = afield;
+        this.gfield = gfield;
+        this.aop = aop;
+        this.child = child;
+        this.aggr = null;
     }
 
     /**
@@ -40,7 +50,7 @@ public class Aggregate extends Operator {
      * */
     public int groupField() {
 	// some code goes here
-	return -1;
+	    return gfield;
     }
 
     /**
@@ -50,7 +60,7 @@ public class Aggregate extends Operator {
      * */
     public String groupFieldName() {
 	// some code goes here
-	return null;
+        return child.getTupleDesc().getFieldName(gfield);
     }
 
     /**
@@ -58,7 +68,7 @@ public class Aggregate extends Operator {
      * */
     public int aggregateField() {
 	// some code goes here
-	return -1;
+	    return afield;
     }
 
     /**
@@ -66,8 +76,8 @@ public class Aggregate extends Operator {
      *         tuples
      * */
     public String aggregateFieldName() {
-	// some code goes here
-	return null;
+	    // some code goes here
+	    return child.getTupleDesc().getFieldName(afield);
     }
 
     /**
@@ -75,7 +85,7 @@ public class Aggregate extends Operator {
      * */
     public Aggregator.Op aggregateOp() {
 	// some code goes here
-	return null;
+	    return aop;
     }
 
     public static String nameOfAggregatorOp(Aggregator.Op aop) {
@@ -85,6 +95,28 @@ public class Aggregate extends Operator {
     public void open() throws NoSuchElementException, DbException,
 	    TransactionAbortedException {
 	// some code goes here
+
+        child.open();
+        Type gbt = null;
+        if (gfield != Aggregator.NO_GROUPING) {
+            gbt = child.getTupleDesc().getFieldType(gfield);
+        }
+
+        if (child.getTupleDesc().getFieldType(afield) == Type.INT_TYPE) {
+            aggr = new IntegerAggregator(gfield, gbt, afield, aop);
+        } else {
+            aggr = new StringAggregator(gfield, gbt, afield, aop);
+        }
+
+        while (child.hasNext()) {
+            aggr.mergeTupleIntoGroup(child.next());
+        }
+        child.close();
+
+        super.open();
+        // compute since
+        it = aggr.iterator();
+        it.open();
     }
 
     /**
@@ -96,11 +128,17 @@ public class Aggregate extends Operator {
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
 	// some code goes here
-	return null;
+        if (it.hasNext()) {
+            return it.next();
+        } else {
+            return null;
+        }
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
 	// some code goes here
+        close();
+        open();
     }
 
     /**
@@ -116,22 +154,32 @@ public class Aggregate extends Operator {
      */
     public TupleDesc getTupleDesc() {
 	// some code goes here
-	return null;
+        TupleDesc child_td = child.getTupleDesc();
+        if (this.gfield == Aggregator.NO_GROUPING) {
+            return new TupleDesc(new Type[]{Type.INT_TYPE},
+                                 new String[]{aop.toString() + "(" + child_td.getFieldName(afield) + ")"});
+        } else {
+            return new TupleDesc(new Type[]{child_td.getFieldType(gfield), Type.INT_TYPE},
+                                 new String[]{child_td.getFieldName(gfield), aop.toString() + "(" + child_td.getFieldName(afield) + ")"});
+        }
     }
 
     public void close() {
-	// some code goes here
+        // some code goes here
+        super.close();
+        it.close();
     }
 
     @Override
     public DbIterator[] getChildren() {
 	// some code goes here
-	return null;
+	    return new DbIterator[]{child};
     }
 
     @Override
     public void setChildren(DbIterator[] children) {
 	// some code goes here
+        this.child = children[0];
     }
     
 }

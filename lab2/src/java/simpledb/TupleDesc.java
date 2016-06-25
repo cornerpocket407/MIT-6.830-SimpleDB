@@ -35,7 +35,7 @@ public class TupleDesc implements Serializable {
         }
 
         public String toString() {
-            return fieldName + "(" + fieldType + ")";
+            return fieldType.toString() + "(" + fieldName + ")";
         }
 
         @Override
