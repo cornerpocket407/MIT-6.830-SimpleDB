@@ -1,13 +1,14 @@
 package simpledb;
 
-import simpledb.Predicate.Op;
-import simpledb.BTreeUtility.*;
-import simpledb.systemtest.SimpleDbTestBase;
-
-import java.util.*;
+import junit.framework.JUnit4TestAdapter;
 import org.junit.Before;
 import org.junit.Test;
-import junit.framework.JUnit4TestAdapter;
+import simpledb.BTreeUtility.BTreeWriter;
+import simpledb.Predicate.Op;
+import simpledb.systemtest.SimpleDbTestBase;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public class BTreeDeadlockTest extends SimpleDbTestBase {
 	private Random rand;
@@ -26,7 +27,8 @@ public class BTreeDeadlockTest extends SimpleDbTestBase {
 	/**
 	 * Set up initial resources for each unit test.
 	 */
-	@Before public void setUp() throws Exception {
+	@Before
+    public void setUp() throws Exception {
 		// create a packed B+ tree with no empty slots
 		bf = BTreeUtility.createRandomBTreeFile(2, 253008, null, null, 0);
 		rand = new Random();
@@ -75,8 +77,8 @@ public class BTreeDeadlockTest extends SimpleDbTestBase {
 	 * Helper method to clean up the syntax of starting a BTreeWriter thread.
 	 * The parameters pass through to the BTreeWriter constructor.
 	 */
-	public BTreeUtility.BTreeWriter startWriter(TransactionId tid, 
-			int item, int count) {
+	public BTreeUtility.BTreeWriter startWriter(TransactionId tid,
+                                                int item, int count) {
 
 		BTreeWriter bw = new BTreeWriter(tid, bf, item, count);
 		bw.start();
@@ -91,7 +93,8 @@ public class BTreeDeadlockTest extends SimpleDbTestBase {
 	 * it needs to obtain a write lock on the root node in order to split the page. This will cause
 	 * a deadlock situation.
 	 */
-	@Test public void testReadWriteDeadlock() throws Exception {
+	@Test
+    public void testReadWriteDeadlock() throws Exception {
 		System.out.println("testReadWriteDeadlock constructing deadlock:");
 
 		TransactionId tid1 = new TransactionId();

@@ -1,18 +1,19 @@
 package simpledb;
 
-import org.junit.Test;
-
-import simpledb.systemtest.SimpleDbTestBase;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 import junit.framework.JUnit4TestAdapter;
+import org.junit.Test;
+import simpledb.systemtest.SimpleDbTestBase;
 
-public class PredicateTest extends SimpleDbTestBase{
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class PredicateTest extends SimpleDbTestBase {
 
   /**
    * Unit test for Predicate.filter()
    */
-  @Test public void filter() {
+  @Test
+  public void filter() {
     int[] vals = new int[] { -1, 0, 1 };
 
     for (int i : vals) {

@@ -1,6 +1,5 @@
 package simpledb;
 
-import javax.xml.crypto.Data;
 import java.util.*;
 import java.io.*;
 
@@ -287,8 +286,8 @@ public class HeapPage implements Page {
         throw new DbException("insertTuple: no empty slots or tupledesc is mismatch");
     }
 
-    private boolean dirty;
-    private TransactionId dirtyby;
+    // private boolean dirty;
+    private TransactionId dirtier;
     /**
      * Marks this page as dirty/not dirty and record that transaction
      * that did the dirtying
@@ -297,11 +296,11 @@ public class HeapPage implements Page {
         // some code goes here
 	// not necessary for lab1
         if (dirty) {
-            this.dirty = dirty;
-            this.dirtyby = tid;
+            // this.dirty = dirty;
+            this.dirtier = tid;
         } else {
-            this.dirty = false;
-            this.dirtyby = null;
+            // this.dirty = false;
+            this.dirtier = null;
         }
     }
 
@@ -311,7 +310,7 @@ public class HeapPage implements Page {
     public TransactionId isDirty() {
         // some code goes here
 	// Not necessary for lab1
-        return dirtyby;
+        return dirtier;
     }
 
     /**
@@ -361,7 +360,7 @@ public class HeapPage implements Page {
         }
     }
 
-    protected class HeapPageTupleIterator implements Iterator {
+    protected class HeapPageTupleIterator implements Iterator<Tuple> {
         private final Iterator<Tuple> iter;
         public HeapPageTupleIterator() {
             ArrayList<Tuple> tupleArrayList = new ArrayList<Tuple>(numSlots);
@@ -384,7 +383,7 @@ public class HeapPage implements Page {
         }
 
         @Override
-        public Object next() {
+        public Tuple next() {
             return iter.next();
         }
     }

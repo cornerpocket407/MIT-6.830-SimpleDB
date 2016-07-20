@@ -1,14 +1,14 @@
 package simpledb.systemtest;
 
-import static org.junit.Assert.*;
+import junit.framework.Assert;
+import org.junit.Test;
+import simpledb.*;
 
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.junit.Test;
-
-import junit.framework.Assert;
-import simpledb.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Creates a heap file with 1024*500 tuples with two integer fields each.  Clears the buffer pool,
@@ -20,7 +20,8 @@ public class EvictionTest extends SimpleDbTestBase {
     private static final long MEMORY_LIMIT_IN_MB = 5;
     private static final int BUFFER_PAGES = 16;
 
-    @Test public void testHeapFileScanWithManyPages() throws IOException, DbException, TransactionAbortedException {
+    @Test
+    public void testHeapFileScanWithManyPages() throws IOException, DbException, TransactionAbortedException {
         System.out.println("EvictionTest creating large table");
         HeapFile f = SystemTestUtil.createRandomHeapFile(2, 1024*500, null, null);
         System.out.println("EvictionTest scanning large table");

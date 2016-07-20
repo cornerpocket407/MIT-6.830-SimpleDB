@@ -1,26 +1,19 @@
 package simpledb.systemtest;
 
-import simpledb.systemtest.SystemTestUtil;
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.NoSuchElementException;
-import java.util.Random;
-import java.util.Iterator;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ArrayBlockingQueue;
-
 import org.junit.After;
 import org.junit.Test;
-import org.junit.Before;
-
 import simpledb.*;
-import simpledb.BTreeUtility.*;
+import simpledb.BTreeUtility.BTreeDeleter;
+import simpledb.BTreeUtility.BTreeInserter;
 import simpledb.Predicate.Op;
+
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * System test for the BTree
@@ -52,7 +45,7 @@ public class BTreeTest extends SimpleDbTestBase {
 		return bd;
 	}
 	
-	private void waitForInserterThreads(ArrayList<BTreeInserter> insertThreads) 
+	private void waitForInserterThreads(ArrayList<BTreeInserter> insertThreads)
 			throws Exception {
 		Thread.sleep(POLL_INTERVAL);
 		for(BTreeInserter thread : insertThreads) {
@@ -62,7 +55,7 @@ public class BTreeTest extends SimpleDbTestBase {
 		}
 	}
 	
-	private void waitForDeleterThreads(ArrayList<BTreeDeleter> deleteThreads) 
+	private void waitForDeleterThreads(ArrayList<BTreeDeleter> deleteThreads)
 			throws Exception {
 		Thread.sleep(POLL_INTERVAL);
 		for(BTreeDeleter thread : deleteThreads) {
@@ -86,7 +79,8 @@ public class BTreeTest extends SimpleDbTestBase {
 	}
 	
     /** Test that doing lots of inserts and deletes in multiple threads works */
-    @Test public void testBigFile() throws Exception {
+    @Test
+    public void testBigFile() throws Exception {
     	// For this test we will decrease the size of the Buffer Pool pages
     	BufferPool.setPageSize(1024);
     	

@@ -1,22 +1,23 @@
 package simpledb;
 
+import junit.framework.JUnit4TestAdapter;
+import org.junit.Before;
+import org.junit.Test;
 import simpledb.BTreeFileEncoder.EntryComparator;
 import simpledb.BTreeFileEncoder.ReverseEntryComparator;
 import simpledb.TestUtil.SkeletonFile;
 import simpledb.systemtest.SimpleDbTestBase;
 import simpledb.systemtest.SystemTestUtil;
 
-//import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import junit.framework.JUnit4TestAdapter;
+//import java.io.File;
 
 public class BTreeInternalPageTest extends SimpleDbTestBase {
 	private BTreePageId pid;
@@ -59,7 +60,7 @@ public class BTreeInternalPageTest extends SimpleDbTestBase {
 
 		// Convert it to a BTreeInternalPage
 		try {
-			EXAMPLE_DATA = BTreeFileEncoder.convertToInternalPage(entries, 
+			EXAMPLE_DATA = BTreeFileEncoder.convertToInternalPage(entries,
 					BufferPool.getPageSize(), Type.INT_TYPE, BTreePageId.LEAF);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -69,7 +70,8 @@ public class BTreeInternalPageTest extends SimpleDbTestBase {
 	/**
 	 * Set up initial resources for each unit test.
 	 */
-	@Before public void addTable() throws Exception {
+	@Before
+    public void addTable() throws Exception {
 		this.pid = new BTreePageId(-1, -1, BTreePageId.INTERNAL);
 		Database.getCatalog().addTable(new SkeletonFile(-1, Utility.getTupleDesc(2)), SystemTestUtil.getUUID());
 	}
@@ -77,7 +79,8 @@ public class BTreeInternalPageTest extends SimpleDbTestBase {
 	/**
 	 * Unit test for BTreeInternalPage.getId()
 	 */
-	@Test public void getId() throws Exception {
+	@Test
+    public void getId() throws Exception {
 		BTreeInternalPage page = new BTreeInternalPage(pid, EXAMPLE_DATA, 0);
 		assertEquals(pid, page.getId());
 	}
@@ -85,7 +88,8 @@ public class BTreeInternalPageTest extends SimpleDbTestBase {
 	/**
 	 * Unit test for BTreeInternalPage.getParentId()
 	 */
-	@Test public void getParentId() throws Exception {
+	@Test
+    public void getParentId() throws Exception {
 		BTreeInternalPage page = new BTreeInternalPage(pid, EXAMPLE_DATA, 0);
 		assertEquals(new BTreePageId(pid.getTableId(), 0, BTreePageId.ROOT_PTR), page.getParentId());
 	}
@@ -93,7 +97,8 @@ public class BTreeInternalPageTest extends SimpleDbTestBase {
 	/**
 	 * Unit test for BTreeInternalPage.getParentId()
 	 */
-	@Test public void setParentId() throws Exception {
+	@Test
+    public void setParentId() throws Exception {
 		BTreeInternalPage page = new BTreeInternalPage(pid, EXAMPLE_DATA, 0);
 		BTreePageId id = new BTreePageId(pid.getTableId(), 1, BTreePageId.INTERNAL);
 		page.setParentId(id);
@@ -119,7 +124,8 @@ public class BTreeInternalPageTest extends SimpleDbTestBase {
 	/**
 	 * Unit test for BTreeInternalPage.iterator()
 	 */
-	@Test public void testIterator() throws Exception {
+	@Test
+    public void testIterator() throws Exception {
 		BTreeInternalPage page = new BTreeInternalPage(pid, EXAMPLE_DATA, 0);
 		Iterator<BTreeEntry> it = page.iterator();
 
@@ -144,7 +150,8 @@ public class BTreeInternalPageTest extends SimpleDbTestBase {
 	/**
 	 * Unit test for BTreeInternalPage.reverseIterator()
 	 */
-	@Test public void testReverseIterator() throws Exception {
+	@Test
+    public void testReverseIterator() throws Exception {
 		BTreeInternalPage page = new BTreeInternalPage(pid, EXAMPLE_DATA, 0);
 		Iterator<BTreeEntry> it = page.reverseIterator();
 
@@ -169,7 +176,8 @@ public class BTreeInternalPageTest extends SimpleDbTestBase {
 	/**
 	 * Unit test for BTreeInternalPage.getNumEmptySlots()
 	 */
-	@Test public void getNumEmptySlots() throws Exception {
+	@Test
+    public void getNumEmptySlots() throws Exception {
 		BTreeInternalPage page = new BTreeInternalPage(pid, EXAMPLE_DATA, 0);
 		assertEquals(483, page.getNumEmptySlots());
 	}
@@ -177,7 +185,8 @@ public class BTreeInternalPageTest extends SimpleDbTestBase {
 	/**
 	 * Unit test for BTreeInternalPage.isSlotUsed()
 	 */
-	@Test public void getSlot() throws Exception {
+	@Test
+    public void getSlot() throws Exception {
 		BTreeInternalPage page = new BTreeInternalPage(pid, EXAMPLE_DATA, 0);
 
 		// assuming the first slot is used for the extra child pointer
@@ -191,7 +200,8 @@ public class BTreeInternalPageTest extends SimpleDbTestBase {
 	/**
 	 * Unit test for BTreeInternalPage.isDirty()
 	 */
-	@Test public void testDirty() throws Exception {
+	@Test
+    public void testDirty() throws Exception {
 		TransactionId tid = new TransactionId();
 		BTreeInternalPage page = new BTreeInternalPage(pid, EXAMPLE_DATA, 0);
 		page.markDirty(true, tid);
@@ -207,7 +217,8 @@ public class BTreeInternalPageTest extends SimpleDbTestBase {
 	/**
 	 * Unit test for BTreeInternalPage.addEntry()
 	 */
-	@Test public void addEntry() throws Exception {
+	@Test
+    public void addEntry() throws Exception {
 		// create a blank page
 		byte[] data = BTreeInternalPage.createEmptyPageData();
 		BTreeInternalPage page = new BTreeInternalPage(pid, data, 0);
@@ -275,7 +286,7 @@ public class BTreeInternalPageTest extends SimpleDbTestBase {
 	/**
 	 * Unit test for BTreeInternalPage.deleteEntry() with false entries
 	 */
-	@Test(expected=DbException.class)
+	@Test(expected= DbException.class)
 	public void deleteNonexistentEntry() throws Exception {
 		BTreeInternalPage page = new BTreeInternalPage(pid, EXAMPLE_DATA, 0);
 		page.deleteKeyAndRightChild(BTreeUtility.getBTreeEntry(2));
@@ -284,7 +295,8 @@ public class BTreeInternalPageTest extends SimpleDbTestBase {
 	/**
 	 * Unit test for BTreeInternalPage.deleteEntry()
 	 */
-	@Test public void deleteEntry() throws Exception {
+	@Test
+    public void deleteEntry() throws Exception {
 		BTreeInternalPage page = new BTreeInternalPage(pid, EXAMPLE_DATA, 0);
 		int free = page.getNumEmptySlots();
 

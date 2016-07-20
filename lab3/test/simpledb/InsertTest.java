@@ -1,11 +1,11 @@
 package simpledb;
 
+import junit.framework.JUnit4TestAdapter;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import junit.framework.JUnit4TestAdapter;
 
 /**
  * We reserve more heavy-duty insertion testing for HeapFile and HeapPage.
@@ -19,7 +19,8 @@ public class InsertTest extends TestUtil.CreateHeapFile {
   /**
    * Initialize each unit test
    */
-  @Before public void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     this.scan1 = TestUtil.createTupleList(2,
         new int[] { 1, 2,
@@ -35,7 +36,8 @@ public class InsertTest extends TestUtil.CreateHeapFile {
   /**
    * Unit test for Insert.getTupleDesc()
    */
-  @Test public void getTupleDesc() throws Exception {
+  @Test
+  public void getTupleDesc() throws Exception {
     Insert op = new Insert(tid,scan1, empty.getId());
     TupleDesc expected = Utility.getTupleDesc(1);
     TupleDesc actual = op.getTupleDesc();
@@ -45,7 +47,8 @@ public class InsertTest extends TestUtil.CreateHeapFile {
   /**
    * Unit test for Insert.getNext(), inserting elements into an empty file
    */
-  @Test public void getNext() throws Exception {
+  @Test
+  public void getNext() throws Exception {
     Insert op = new Insert(tid,scan1, empty.getId());
     op.open();
     assertTrue(TestUtil.compareTuples(

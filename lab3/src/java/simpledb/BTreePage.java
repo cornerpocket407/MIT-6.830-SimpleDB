@@ -48,7 +48,7 @@ public abstract class BTreePage implements Page {
 	 * @see BufferPool#getPageSize()
 	 * 
 	 * @param id - the id of this page
-	 * @param data - the raw data of this page
+	 // * @param data - the raw data of this page
 	 * @param key - the field which the index is keyed on
 	 */
 	public BTreePage(BTreePageId id, int key) throws IOException {

@@ -1,17 +1,16 @@
 package simpledb.systemtest;
 
-import simpledb.systemtest.SimpleDbTestBase;
-import simpledb.Predicate.Op;
-import simpledb.*;
-
-import java.util.*;
-
+import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import simpledb.*;
+import simpledb.Predicate.Op;
 
-import static org.junit.Assert.*;
-import junit.framework.JUnit4TestAdapter;
+import java.util.Iterator;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BTreeFileDeleteTest extends SimpleDbTestBase {
 	private TransactionId tid;
@@ -163,7 +162,7 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 
 		// insert enough tuples to ensure one of the leaf pages splits
 		for(int i = 0; i < 502; ++i) {
-			Database.getBufferPool().insertTuple(tid, threeLeafPageFile.getId(), 
+			Database.getBufferPool().insertTuple(tid, threeLeafPageFile.getId(),
 					BTreeUtility.getBTreeTuple(i, 2));
 		}
 
@@ -197,7 +196,7 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		int count = 0;
 		// bring the right internal page to minimum occupancy
 		while(it.hasNext() && count < 49 * 502 + 1) {
-			BTreeLeafPage leaf = (BTreeLeafPage) Database.getBufferPool().getPage(tid, 
+			BTreeLeafPage leaf = (BTreeLeafPage) Database.getBufferPool().getPage(tid,
 					it.next().getLeftChild(), Permissions.READ_ONLY);
 			Tuple t = leaf.iterator().next();
 			Database.getBufferPool().deleteTuple(tid, t);
@@ -210,7 +209,7 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		assertEquals(252, rightChild.getNumEmptySlots());
 		count = 0;
 		while(it.hasNext() && count < 502) {
-			BTreeLeafPage leaf = (BTreeLeafPage) Database.getBufferPool().getPage(tid, 
+			BTreeLeafPage leaf = (BTreeLeafPage) Database.getBufferPool().getPage(tid,
 					it.next().getLeftChild(), Permissions.READ_ONLY);
 			Tuple t = leaf.iterator().next();
 			Database.getBufferPool().deleteTuple(tid, t);

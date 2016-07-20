@@ -1,18 +1,18 @@
 package simpledb.systemtest;
 
-import simpledb.systemtest.SimpleDbTestBase;
-import simpledb.Predicate.Op;
-import simpledb.*;
-
-import java.io.File;
-import java.util.*;
-
+import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import simpledb.*;
+import simpledb.Predicate.Op;
 
-import static org.junit.Assert.*;
-import junit.framework.JUnit4TestAdapter;
+import java.io.File;
+import java.util.Iterator;
+import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BTreeFileInsertTest extends SimpleDbTestBase {
 	private TransactionId tid;
@@ -34,7 +34,8 @@ public class BTreeFileInsertTest extends SimpleDbTestBase {
 		Database.reset();
 	}
 
-	@Test public void addTuple() throws Exception {
+	@Test
+    public void addTuple() throws Exception {
 		// create an empty B+ tree file keyed on the second field of a 2-field tuple
 		File emptyFile = File.createTempFile("empty", ".dat");
 		emptyFile.deleteOnExit();
@@ -74,7 +75,8 @@ public class BTreeFileInsertTest extends SimpleDbTestBase {
 		} 
 	}
 
-	@Test public void addDuplicateTuples() throws Exception {
+	@Test
+    public void addDuplicateTuples() throws Exception {
 		// create an empty B+ tree file keyed on the second field of a 2-field tuple
 		File emptyFile = File.createTempFile("empty", ".dat");
 		emptyFile.deleteOnExit();
@@ -165,7 +167,7 @@ public class BTreeFileInsertTest extends SimpleDbTestBase {
 				null, null, 0);
 
 		// we will need more room in the buffer pool for this test
-		Database.resetBufferPool(500);		
+		Database.resetBufferPool(500);
 
 		// there should be 504 leaf pages + 1 internal node
 		assertEquals(505, bigFile.numPages());

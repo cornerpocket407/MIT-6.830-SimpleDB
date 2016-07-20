@@ -1,16 +1,15 @@
 package simpledb;
 
-import simpledb.systemtest.SimpleDbTestBase;
-import simpledb.Predicate.Op;
-
-import java.util.*;
-
+import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import simpledb.Predicate.Op;
+import simpledb.systemtest.SimpleDbTestBase;
+
+import java.util.NoSuchElementException;
 
 import static org.junit.Assert.*;
-import junit.framework.JUnit4TestAdapter;
 
 public class BTreeFileReadTest extends SimpleDbTestBase {
 	private BTreeFile f;
@@ -133,7 +132,8 @@ public class BTreeFileReadTest extends SimpleDbTestBase {
 	/**
 	 * Unit test for BTreeFile.indexIterator()
 	 */
-	@Test public void indexIterator() throws Exception {
+	@Test
+    public void indexIterator() throws Exception {
 		BTreeFile twoLeafPageFile = BTreeUtility.createBTreeFile(2, 520,
 				null, null, 0);
 		Field f =  new IntField(5);

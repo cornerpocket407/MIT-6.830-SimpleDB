@@ -1,14 +1,14 @@
 package simpledb.systemtest;
 
+import org.junit.Test;
+import simpledb.*;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
-
-import simpledb.*;
+import static org.junit.Assert.assertEquals;
 
 public abstract class FilterBase extends SimpleDbTestBase {
     private static final int COLUMNS = 3;
@@ -58,27 +58,32 @@ public abstract class FilterBase extends SimpleDbTestBase {
                 COLUMNS, ROWS, columnSpecification, createdTuples);
     }
 
-    @Test public void testEquals() throws
+    @Test
+    public void testEquals() throws
             DbException, TransactionAbortedException, IOException {
         validatePredicate(0, 1, 1, 2, Predicate.Op.EQUALS);
     }
 
-    @Test public void testLessThan() throws
+    @Test
+    public void testLessThan() throws
             DbException, TransactionAbortedException, IOException {
         validatePredicate(1, 1, 2, 1, Predicate.Op.LESS_THAN);
     }
 
-    @Test public void testLessThanOrEq() throws
+    @Test
+    public void testLessThanOrEq() throws
             DbException, TransactionAbortedException, IOException {
         validatePredicate(2, 42, 42, 41, Predicate.Op.LESS_THAN_OR_EQ);
     }
 
-    @Test public void testGreaterThan() throws
+    @Test
+    public void testGreaterThan() throws
             DbException, TransactionAbortedException, IOException {
         validatePredicate(2, 42, 41, 42, Predicate.Op.GREATER_THAN);
     }
 
-    @Test public void testGreaterThanOrEq() throws
+    @Test
+    public void testGreaterThanOrEq() throws
             DbException, TransactionAbortedException, IOException {
         validatePredicate(2, 42, 42, 43, Predicate.Op.GREATER_THAN_OR_EQ);
     }

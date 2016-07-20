@@ -1,8 +1,7 @@
 package simpledb.systemtest;
 
-import simpledb.systemtest.SystemTestUtil;
-
-import static org.junit.Assert.*;
+import org.junit.Test;
+import simpledb.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,9 +9,8 @@ import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-import org.junit.Test;
-
-import simpledb.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Dumps the contents of a table.
@@ -36,15 +34,17 @@ public class ScanTest extends SimpleDbTestBase {
     }
 
     /** Scan 1-4 columns. */
-    @Test public void testSmall() throws IOException, DbException, TransactionAbortedException {
-        int[] columnSizes = new int[]{1, 2, 3, 4};
+    @Test
+    public void testSmall() throws IOException, DbException, TransactionAbortedException {
+        int[] columnSizes = new int[]{1, 2, 3, 4, 5};
         int[] rowSizes =
-                new int[]{0, 1, 2, 511, 512, 513, 1023, 1024, 1025, 4096 + r.nextInt(4096)};
-        validateScan(columnSizes, rowSizes);
+                new int[]{0, 1, 2, 511, 512, 513, 1023, 1024, 1025, 4096 + r.nextInt(4096)}; // 0, 1, 2, 511, 512, 513,
+                validateScan(columnSizes, rowSizes);
     }
 
     /** Test that rewinding a SeqScan iterator works. */
-    @Test public void testRewind() throws IOException, DbException, TransactionAbortedException {
+    @Test
+    public void testRewind() throws IOException, DbException, TransactionAbortedException {
         ArrayList<ArrayList<Integer>> tuples = new ArrayList<ArrayList<Integer>>();
         HeapFile f = SystemTestUtil.createRandomHeapFile(2, 1000, null, tuples);
 
@@ -70,7 +70,8 @@ public class ScanTest extends SimpleDbTestBase {
     /** Verifies that the buffer pool is actually caching data.
      * @throws TransactionAbortedException
      * @throws DbException */
-    @Test public void testCache() throws IOException, DbException, TransactionAbortedException {
+    @Test
+    public void testCache() throws IOException, DbException, TransactionAbortedException {
         /** Counts the number of readPage operations. */
         class InstrumentedHeapFile extends HeapFile {
             public InstrumentedHeapFile(File f, TupleDesc td) {

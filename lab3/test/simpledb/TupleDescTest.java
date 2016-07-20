@@ -1,21 +1,21 @@
 package simpledb;
 
-import java.util.NoSuchElementException;
-
-import org.junit.Test;
-
-import simpledb.systemtest.SimpleDbTestBase;
-
-import static org.junit.Assert.*;
 import junit.framework.Assert;
 import junit.framework.JUnit4TestAdapter;
+import org.junit.Test;
+import simpledb.systemtest.SimpleDbTestBase;
+
+import java.util.NoSuchElementException;
+
+import static org.junit.Assert.*;
 
 public class TupleDescTest extends SimpleDbTestBase {
 
     /**
      * Unit test for TupleDesc.combine()
      */
-    @Test public void combine() {
+    @Test
+    public void combine() {
         TupleDesc td1, td2, td3;
 
         td1 = Utility.getTupleDesc(1, "td1");
@@ -44,6 +44,9 @@ public class TupleDescTest extends SimpleDbTestBase {
         for (int i = 0; i < 4; ++i)
             assertEquals(Type.INT_TYPE, td3.getFieldType(i));
         assertEquals(combinedStringArrays(td2, td2, td3), true);
+
+        TupleDesc td4, td5;
+
     }
 
     /**
@@ -70,7 +73,8 @@ public class TupleDescTest extends SimpleDbTestBase {
     /**
      * Unit test for TupleDesc.getType()
      */
-    @Test public void getType() {
+    @Test
+    public void getType() {
         int[] lengths = new int[] { 1, 2, 1000 };
 
         for (int len: lengths) {
@@ -83,7 +87,8 @@ public class TupleDescTest extends SimpleDbTestBase {
     /**
      * Unit test for TupleDesc.nameToId()
      */
-    @Test public void nameToId() {
+    @Test
+    public void nameToId() {
         int[] lengths = new int[] { 1, 2, 1000 };
         String prefix = "test";
         
@@ -124,7 +129,8 @@ public class TupleDescTest extends SimpleDbTestBase {
     /**
      * Unit test for TupleDesc.getSize()
      */
-    @Test public void getSize() {
+    @Test
+    public void getSize() {
         int[] lengths = new int[] { 1, 2, 1000 };
 
         for (int len: lengths) {
@@ -136,7 +142,8 @@ public class TupleDescTest extends SimpleDbTestBase {
     /**
      * Unit test for TupleDesc.numFields()
      */
-    @Test public void numFields() {
+    @Test
+    public void numFields() {
         int[] lengths = new int[] { 1, 2, 1000 };
 
         for (int len : lengths) {
@@ -145,7 +152,8 @@ public class TupleDescTest extends SimpleDbTestBase {
         }
     }
 
-    @Test public void testEquals() {
+    @Test
+    public void testEquals() {
         TupleDesc singleInt = new TupleDesc(new Type[]{Type.INT_TYPE});
         TupleDesc singleInt2 = new TupleDesc(new Type[]{Type.INT_TYPE});
         TupleDesc intString = new TupleDesc(new Type[]{Type.INT_TYPE, Type.STRING_TYPE});
@@ -166,6 +174,7 @@ public class TupleDescTest extends SimpleDbTestBase {
         assertFalse(intString.equals(singleInt));
         assertFalse(intString.equals(singleInt2));
     }
+
 
     /**
      * JUnit suite target

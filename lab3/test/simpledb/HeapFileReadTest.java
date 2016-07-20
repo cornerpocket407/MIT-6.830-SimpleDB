@@ -1,15 +1,15 @@
 package simpledb;
 
-import simpledb.systemtest.SimpleDbTestBase;
-import simpledb.systemtest.SystemTestUtil;
-
-import java.util.*;
+import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import simpledb.systemtest.SimpleDbTestBase;
+import simpledb.systemtest.SystemTestUtil;
+
+import java.util.NoSuchElementException;
 
 import static org.junit.Assert.*;
-import junit.framework.JUnit4TestAdapter;
 
 public class HeapFileReadTest extends SimpleDbTestBase {
     private HeapFile hf;
@@ -119,6 +119,21 @@ public class HeapFileReadTest extends SimpleDbTestBase {
         }
         // close twice is harmless
         it.close();
+    }
+    @Test
+    public void testIteratorMultipage() throws Exception {
+        Database.getBufferPool().setPageSize(1024);
+        HeapFile multiPageFile = SystemTestUtil.createRandomHeapFile(3, 520, null, null);
+        int cnt = 0;
+        DbFileIterator it = multiPageFile.iterator(tid);
+        it.open();
+        while (it.hasNext()) {
+            assertNotNull(it.next());
+            cnt += 1;
+        }
+        assertEquals(cnt, 520);
+        it.close();
+        Database.getBufferPool().resetPageSize();
     }
 
     /**

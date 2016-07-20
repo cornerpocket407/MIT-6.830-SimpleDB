@@ -1,16 +1,11 @@
 package simpledb.systemtest;
 
+import org.junit.Assert;
+import simpledb.*;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
-
-import org.junit.Assert;
-
-import simpledb.*;
+import java.util.*;
 
 public class SystemTestUtil {
     public static final TupleDesc SINGLE_INT_DESCRIPTOR =

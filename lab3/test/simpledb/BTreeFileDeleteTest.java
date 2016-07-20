@@ -1,17 +1,17 @@
 package simpledb;
 
-import simpledb.systemtest.SimpleDbTestBase;
-import simpledb.Predicate.Op;
-
-import java.io.File;
-import java.util.*;
-
+import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import simpledb.Predicate.Op;
+import simpledb.systemtest.SimpleDbTestBase;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import static org.junit.Assert.*;
-import junit.framework.JUnit4TestAdapter;
 
 public class BTreeFileDeleteTest extends SimpleDbTestBase {
 	private TransactionId tid;
@@ -32,7 +32,8 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 	/**
 	 * Unit test for BTreeFile.deleteTuple()
 	 */
-	@Test public void deleteTuple() throws Exception {
+	@Test
+    public void deleteTuple() throws Exception {
 		BTreeFile f;
 		f = BTreeUtility.createRandomBTreeFile(2, 20, null, null, 0);
 		DbFileIterator it = f.iterator(tid);
@@ -65,7 +66,7 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		// create the leaf pages
 		BTreePageId pageId = new BTreePageId(tableid, 1, BTreePageId.LEAF);
 		BTreePageId siblingId = new BTreePageId(tableid, 2, BTreePageId.LEAF);
-		BTreeLeafPage page = BTreeUtility.createRandomLeafPage(pageId, 2, keyField, 
+		BTreeLeafPage page = BTreeUtility.createRandomLeafPage(pageId, 2, keyField,
 				BTreeUtility.getNumTuplesPerPage(2)/2 - 1, BTreeUtility.MAX_RAND_VALUE/2, BTreeUtility.MAX_RAND_VALUE);
 		BTreeLeafPage sibling = BTreeUtility.createRandomLeafPage(siblingId, 2, keyField, 0, BTreeUtility.MAX_RAND_VALUE/2);
 		
@@ -88,7 +89,7 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		assertEquals(totalTuples, page.getNumTuples() + sibling.getNumTuples());
 		assertTrue(page.getNumTuples() == totalTuples/2 || page.getNumTuples() == totalTuples/2 + 1);
 		assertTrue(sibling.getNumTuples() == totalTuples/2 || sibling.getNumTuples() == totalTuples/2 + 1);
-		assertTrue(sibling.reverseIterator().next().getField(keyField).compare(Op.LESS_THAN_OR_EQ, 
+		assertTrue(sibling.reverseIterator().next().getField(keyField).compare(Op.LESS_THAN_OR_EQ,
 				page.iterator().next().getField(keyField)));
 		assertEquals(parent.iterator().next().getKey(), page.iterator().next().getField(keyField));
 	} 
@@ -105,7 +106,7 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		// create the leaf pages
 		BTreePageId pageId = new BTreePageId(tableid, 1, BTreePageId.LEAF);
 		BTreePageId siblingId = new BTreePageId(tableid, 2, BTreePageId.LEAF);
-		BTreeLeafPage page = BTreeUtility.createRandomLeafPage(pageId, 2, keyField, 
+		BTreeLeafPage page = BTreeUtility.createRandomLeafPage(pageId, 2, keyField,
 				BTreeUtility.getNumTuplesPerPage(2)/2 - 1, 0, BTreeUtility.MAX_RAND_VALUE/2);
 		BTreeLeafPage sibling = BTreeUtility.createRandomLeafPage(siblingId, 2, keyField, BTreeUtility.MAX_RAND_VALUE/2, BTreeUtility.MAX_RAND_VALUE);
 		
@@ -128,7 +129,7 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		assertEquals(totalTuples, page.getNumTuples() + sibling.getNumTuples());
 		assertTrue(page.getNumTuples() == totalTuples/2 || page.getNumTuples() == totalTuples/2 + 1);
 		assertTrue(sibling.getNumTuples() == totalTuples/2 || sibling.getNumTuples() == totalTuples/2 + 1);
-		assertTrue(page.reverseIterator().next().getField(keyField).compare(Op.LESS_THAN_OR_EQ, 
+		assertTrue(page.reverseIterator().next().getField(keyField).compare(Op.LESS_THAN_OR_EQ,
 				sibling.iterator().next().getField(keyField)));
 		assertEquals(parent.iterator().next().getKey(), sibling.iterator().next().getField(keyField));
 	} 
@@ -145,14 +146,14 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		// create the leaf pages
 		BTreePageId leftPageId = new BTreePageId(tableid, 2, BTreePageId.LEAF);
 		BTreePageId rightPageId = new BTreePageId(tableid, 3, BTreePageId.LEAF);
-		BTreeLeafPage leftPage = BTreeUtility.createRandomLeafPage(leftPageId, 2, keyField, 
+		BTreeLeafPage leftPage = BTreeUtility.createRandomLeafPage(leftPageId, 2, keyField,
 				BTreeUtility.getNumTuplesPerPage(2)/2 - 1, 0, BTreeUtility.MAX_RAND_VALUE/2);
-		BTreeLeafPage rightPage = BTreeUtility.createRandomLeafPage(rightPageId, 2, keyField, 
+		BTreeLeafPage rightPage = BTreeUtility.createRandomLeafPage(rightPageId, 2, keyField,
 				BTreeUtility.getNumTuplesPerPage(2)/2 - 1, BTreeUtility.MAX_RAND_VALUE/2, BTreeUtility.MAX_RAND_VALUE);
 		
 		// create the parent page and the new entry
 		BTreePageId parentId = new BTreePageId(tableid, 1, BTreePageId.INTERNAL);
-		BTreeInternalPage parent = BTreeUtility.createRandomInternalPage(parentId, keyField, 
+		BTreeInternalPage parent = BTreeUtility.createRandomInternalPage(parentId, keyField,
 				BTreePageId.LEAF, BTreeUtility.MAX_RAND_VALUE/2, BTreeUtility.MAX_RAND_VALUE, 2);
 		BTreeEntry entry = parent.iterator().next();
 		Field siblingKey = rightPage.iterator().next().getField(keyField);
@@ -197,7 +198,7 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		BTreePageId siblingId = new BTreePageId(tableid, 2, BTreePageId.INTERNAL);
 		BTreeInternalPage page = BTreeUtility.createRandomInternalPage(pageId, keyField, BTreePageId.LEAF,
 				entriesPerPage/2 - 1, BTreeUtility.MAX_RAND_VALUE/2, BTreeUtility.MAX_RAND_VALUE, 5 + entriesPerPage);
-		BTreeInternalPage sibling = BTreeUtility.createRandomInternalPage(siblingId, keyField, 
+		BTreeInternalPage sibling = BTreeUtility.createRandomInternalPage(siblingId, keyField,
 				BTreePageId.LEAF, 0, BTreeUtility.MAX_RAND_VALUE/2, 4);
 		
 		// create the parent page and the new entry
@@ -228,7 +229,7 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		assertTrue(sibling.getNumEntries() == totalEntries/2 || sibling.getNumEntries() == totalEntries/2 + 1);
 		
 		// are the keys in the left page less than the keys in the right page?
-		assertTrue(sibling.reverseIterator().next().getKey().compare(Op.LESS_THAN_OR_EQ, 
+		assertTrue(sibling.reverseIterator().next().getKey().compare(Op.LESS_THAN_OR_EQ,
 				page.iterator().next().getKey()));
 		
 		// is the parent key reasonable?
@@ -263,7 +264,7 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		BTreePageId siblingId = new BTreePageId(tableid, 2, BTreePageId.INTERNAL);
 		BTreeInternalPage page = BTreeUtility.createRandomInternalPage(pageId, keyField, BTreePageId.LEAF,
 				entriesPerPage/2 - 1, 0, BTreeUtility.MAX_RAND_VALUE/2, 4);
-		BTreeInternalPage sibling = BTreeUtility.createRandomInternalPage(siblingId, keyField, 
+		BTreeInternalPage sibling = BTreeUtility.createRandomInternalPage(siblingId, keyField,
 				BTreePageId.LEAF, BTreeUtility.MAX_RAND_VALUE/2, BTreeUtility.MAX_RAND_VALUE, 4 + entriesPerPage/2);
 		
 		// create the parent page and the new entry
@@ -294,7 +295,7 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		assertTrue(sibling.getNumEntries() == totalEntries/2 || sibling.getNumEntries() == totalEntries/2 + 1);
 		
 		// are the keys in the left page less than the keys in the right page?
-		assertTrue(page.reverseIterator().next().getKey().compare(Op.LESS_THAN_OR_EQ, 
+		assertTrue(page.reverseIterator().next().getKey().compare(Op.LESS_THAN_OR_EQ,
 				sibling.iterator().next().getKey()));
 		
 		// is the parent key reasonable?
@@ -334,7 +335,7 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		
 		// create the parent page and the new entry
 		BTreePageId parentId = new BTreePageId(tableid, 1, BTreePageId.INTERNAL);
-		BTreeInternalPage parent = BTreeUtility.createRandomInternalPage(parentId, keyField, 
+		BTreeInternalPage parent = BTreeUtility.createRandomInternalPage(parentId, keyField,
 				BTreePageId.LEAF, BTreeUtility.MAX_RAND_VALUE/2, BTreeUtility.MAX_RAND_VALUE, 2);
 		BTreeEntry entry = parent.iterator().next();
 		Field siblingKey = rightPage.iterator().next().getKey();

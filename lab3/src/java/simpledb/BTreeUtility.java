@@ -1,18 +1,13 @@
 package simpledb;
 
+import simpledb.Predicate.Op;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
-
-import simpledb.Predicate.Op;
 
 /** Helper methods used for testing and implementing random features. */
 public class BTreeUtility {
@@ -133,8 +128,8 @@ public class BTreeUtility {
 	 * @throws TransactionAbortedException
 	 */
 	public static BTreeFile createRandomBTreeFile(int columns, int rows,
-			int maxValue, Map<Integer, Integer> columnSpecification,
-			ArrayList<ArrayList<Integer>> tuples, int keyField) 
+                                                  int maxValue, Map<Integer, Integer> columnSpecification,
+                                                  ArrayList<ArrayList<Integer>> tuples, int keyField)
 					throws IOException, DbException, TransactionAbortedException {
 
 		if (tuples != null) {
@@ -264,8 +259,8 @@ public class BTreeUtility {
 		Collections.sort(keys);
 		ArrayList<BTreeEntry> entryList = new ArrayList<BTreeEntry>();
 		for(int i = 0; i < numKeys; ++i) {
-			entryList.add(new BTreeEntry(new IntField(keys.get(i)), 
-					new BTreePageId(tableid, childPointers.get(i), childPageCategory), 
+			entryList.add(new BTreeEntry(new IntField(keys.get(i)),
+					new BTreePageId(tableid, childPointers.get(i), childPageCategory),
 					new BTreePageId(tableid, childPointers.get(i+1), childPageCategory)));
 		}
 		return entryList;
@@ -311,7 +306,7 @@ public class BTreeUtility {
 	public static BTreeLeafPage createRandomLeafPage(BTreePageId pid, int columns, int keyField, int numTuples, int min, int max) throws IOException {
 		Type[] typeAr = new Type[columns];
 		Arrays.fill(typeAr, Type.INT_TYPE);
-		byte[] data = BTreeFileEncoder.convertToLeafPage(BTreeUtility.generateRandomTuples(columns, numTuples, min, max), 
+		byte[] data = BTreeFileEncoder.convertToLeafPage(BTreeUtility.generateRandomTuples(columns, numTuples, min, max),
 				BufferPool.getPageSize(), columns, typeAr, keyField);
 		BTreeLeafPage page = new BTreeLeafPage(pid, data, keyField);
 		return page;
@@ -324,7 +319,7 @@ public class BTreeUtility {
 	public static int getNumEntriesPerPage() {
 		int nentrybytes = Type.INT_TYPE.getLen() + BTreeInternalPage.INDEX_SIZE;
 		// pointerbytes: one extra child pointer, parent pointer, child page category
-		int internalpointerbytes = 2 * BTreeLeafPage.INDEX_SIZE + 1; 
+		int internalpointerbytes = 2 * BTreeLeafPage.INDEX_SIZE + 1;
 		int entriesPerPage = (BufferPool.getPageSize() * 8 - internalpointerbytes * 8 - 1) /  (nentrybytes * 8 + 1);  //floor comes for free
 		return entriesPerPage;
 	}
@@ -358,7 +353,7 @@ public class BTreeUtility {
 	 * @throws IOException
 	 */
 	public static BTreeInternalPage createRandomInternalPage(BTreePageId pid, int keyField, int childPageCategory, int numKeys, int minKey, int maxKey, int minChildPtr) throws IOException {
-		byte[] data = BTreeFileEncoder.convertToInternalPage(BTreeUtility.generateRandomEntries(numKeys, pid.getTableId(), childPageCategory, minKey, maxKey, minChildPtr), 
+		byte[] data = BTreeFileEncoder.convertToInternalPage(BTreeUtility.generateRandomEntries(numKeys, pid.getTableId(), childPageCategory, minKey, maxKey, minChildPtr),
 				BufferPool.getPageSize(), Type.INT_TYPE, childPageCategory);
 		BTreeInternalPage page = new BTreeInternalPage(pid, data, keyField);
 		return page;
@@ -377,8 +372,8 @@ public class BTreeUtility {
 	 * @throws TransactionAbortedException
 	 */
 	public static BTreeFile createBTreeFile(int columns, int rows,
-			Map<Integer, Integer> columnSpecification,
-			ArrayList<ArrayList<Integer>> tuples, int keyField) 
+                                            Map<Integer, Integer> columnSpecification,
+                                            ArrayList<ArrayList<Integer>> tuples, int keyField)
 					throws IOException, DbException, TransactionAbortedException {
 		if (tuples != null) {
 			tuples.clear();
@@ -542,7 +537,7 @@ public class BTreeUtility {
 
 				try {
 					Database.getBufferPool().transactionComplete(tid, false);
-				} catch (java.io.IOException e2) {
+				} catch (IOException e2) {
 					e2.printStackTrace();
 				}
 			}
@@ -629,7 +624,7 @@ public class BTreeUtility {
 
 				try {
 					Database.getBufferPool().transactionComplete(tid, false);
-				} catch (java.io.IOException e2) {
+				} catch (IOException e2) {
 					e2.printStackTrace();
 				}
 			}
@@ -654,7 +649,7 @@ public class BTreeUtility {
 			 }
 		 }
 	}
-	
+
 	/**
 	 * Helper class that attempts to insert a tuple in a new thread
 	 *
@@ -701,12 +696,12 @@ public class BTreeUtility {
 
 				try {
 					Database.getBufferPool().transactionComplete(tid, false);
-				} catch (java.io.IOException e2) {
+				} catch (IOException e2) {
 					e2.printStackTrace();
 				}
 			}
 		}
-		
+
 		private void init(BTreeFile bf, int[] tupdata, BlockingQueue<ArrayList<Integer>> insertedTuples) {
 			this.tid = new TransactionId();
 			this.bf = bf;
@@ -717,7 +712,7 @@ public class BTreeUtility {
 			this.slock = new Object();
 			this.elock = new Object();
 		}
-		
+
 		public void rerun(BTreeFile bf, int[] tupdata, BlockingQueue<ArrayList<Integer>> insertedTuples) {
 			init(bf, tupdata, insertedTuples);
 			run();
@@ -742,7 +737,7 @@ public class BTreeUtility {
 			 }
 		 }
 	}
-    
+
 	/**
 	 * Helper class that attempts to delete tuple(s) in a new thread
 	 *
@@ -801,7 +796,7 @@ public class BTreeUtility {
 				try {
 					insertedTuples.put(tuple);
 					Database.getBufferPool().transactionComplete(tid, false);
-				} catch (java.io.IOException e2) {
+				} catch (IOException e2) {
 					e2.printStackTrace();
 				} catch (InterruptedException e3) {
 					e3.printStackTrace();

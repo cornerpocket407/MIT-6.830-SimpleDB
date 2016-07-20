@@ -1,17 +1,16 @@
 package simpledb;
 
-import simpledb.systemtest.SimpleDbTestBase;
-import simpledb.BTreeUtility.BTreeWriter;
-import simpledb.Predicate.Op;
-
-import java.util.*;
-
+import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import simpledb.BTreeUtility.BTreeWriter;
+import simpledb.Predicate.Op;
+import simpledb.systemtest.SimpleDbTestBase;
+
+import java.util.Iterator;
 
 import static org.junit.Assert.*;
-import junit.framework.JUnit4TestAdapter;
 
 public class BTreeNextKeyLockingTest extends SimpleDbTestBase {
 	private TransactionId tid;
