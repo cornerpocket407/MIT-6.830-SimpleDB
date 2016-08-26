@@ -129,7 +129,7 @@ public class HeapFile implements DbFile {
         ArrayList<Page> affected = new ArrayList<>(1);
         int numPages = numPages();
 
-        for (int pgNo = 0; pgNo < numPages + 1; pgNo++) {
+        for (int pgNo = 0; pgNo <= numPages; pgNo++) {
             HeapPageId pid = new HeapPageId(getId(), pgNo);
             HeapPage pg;
             if (pgNo < numPages) {

@@ -129,7 +129,7 @@ public class HeapFile implements DbFile {
         ArrayList<Page> affected = new ArrayList<>(1);
         int numPages = numPages();
 
-        for (int pgNo = 0; pgNo < numPages + 1; pgNo++) {
+        for (int pgNo = 0; pgNo <= numPages; pgNo++) {
             HeapPageId pid = new HeapPageId(getId(), pgNo);
             HeapPage pg;
             if (pgNo < numPages) {
@@ -144,6 +144,7 @@ public class HeapFile implements DbFile {
                 pg.insertTuple(t);
                 // writePage(pg);
                 if (pgNo < numPages) {
+                    pg.markDirty(true, tid);
                     affected.add(pg);
                 } else {
                     // should append the dbfile
@@ -166,10 +167,11 @@ public class HeapFile implements DbFile {
         RecordId rid = t.getRecordId();
         HeapPageId pid = (HeapPageId) rid.getPageId();
         if (pid.getTableId() == getId()) {
-            int pgNo = pid.pageNumber();
+            // int pgNo = pid.pageNumber();
             HeapPage pg = (HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
             pg.deleteTuple(t);
             // writePage(pg);
+            pg.markDirty(true, tid);
             affected.add(pg);
             return affected;
         }

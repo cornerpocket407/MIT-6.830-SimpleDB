@@ -232,7 +232,7 @@ public class BufferPool {
                 // then write back
                 DbFile tb = Database.getCatalog().getDatabaseFile(pg.getId().getTableId());
                 tb.writePage(pg);
-                pg.markDirty(false, new TransactionId());
+                pg.markDirty(false, null);
             }
         }
     }
