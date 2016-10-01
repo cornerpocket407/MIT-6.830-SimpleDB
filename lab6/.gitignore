@@ -1,0 +1,10 @@
+
+simpledb.iml
+.classpath
+.project
+log
+
+.idea/*
+bin/*
+lib/*
+
