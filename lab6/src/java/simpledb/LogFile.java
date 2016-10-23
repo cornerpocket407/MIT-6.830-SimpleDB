@@ -1,6 +1,8 @@
 
 package simpledb;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+
 import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
@@ -148,16 +150,20 @@ public class LogFile {
         // calls rollback
 
         synchronized (Database.getBufferPool()) {
-
             synchronized(this) {
-                preAppend();
-                //Debug.log("ABORT");
+                Debug.log("ABORT");
                 //should we verify that this is a live transaction?
 
                 // must do this here, since rollback only works for
                 // live transactions (needs tidToFirstLogRecord)
+                if (tidToFirstLogRecord.get(tid.getId()) == null) {
+                    throw new IOException("ABORT: transaction " + tid.getId() + "is not live");
+                }
                 rollback(tid);
 
+                preAppend();
+                // long it = raf.getFilePointer();
+                // raf.seek(currentOffset);
                 raf.writeInt(ABORT_RECORD);
                 raf.writeLong(tid.getId());
                 raf.writeLong(currentOffset);
@@ -207,6 +213,7 @@ public class LogFile {
            after page data
            start offset
         */
+        long begin = raf.getFilePointer();
         raf.writeInt(UPDATE_RECORD);
         raf.writeLong(tid.getId());
 
@@ -214,7 +221,6 @@ public class LogFile {
         writePageData(raf,after);
         raf.writeLong(currentOffset);
         currentOffset = raf.getFilePointer();
-
         Debug.log("WRITE OFFSET = " + currentOffset);
     }
 
@@ -465,10 +471,57 @@ public class LogFile {
         throws NoSuchElementException, IOException {
         synchronized (Database.getBufferPool()) {
             synchronized(this) {
-                preAppend();
+                // preAppend();
                 // some code goes here
+                rollbackInternal(tid.getId());
+
             }
         }
+    }
+
+    private void rollbackInternal(long tid)throws NoSuchElementException, IOException {
+        // assume when rollbackInternal are called the transaction cant be commited status
+        Long begin = tidToFirstLogRecord.get(tid);
+        // if (begin > raf.getFilePointer() || raf.getFilePointer() - LONG_SIZE < 0) {
+        //     return;
+        // }
+        // start with last one
+        raf.seek(raf.length() - LONG_SIZE);
+        long logPtr = raf.readLong();
+        while (begin < logPtr) {
+            // backword scanning
+            // Long logPtr = raf.readLong();
+            raf.seek(logPtr);
+            int type = raf.readInt();
+            long record_tid;
+            switch (type) {
+                case UPDATE_RECORD:
+                    record_tid = raf.readLong();
+                    if (record_tid == tid) {
+                        Page before = this.readPageData(raf);
+                        Database.getCatalog().getDatabaseFile(before.getId().getTableId()).writePage(before);
+                        Database.getBufferPool().discardPage(before.getId());
+                        break;
+                    }
+                default:
+                    break;
+                /*
+                    case ABORT_RECORD:
+                           break;
+                    case COMMIT_RECORD:
+                            break;
+                    case BEGIN_RECORD:
+                            break;
+                    case CHECKPOINT_RECORD:
+                            break;
+                         */
+                }
+
+            raf.seek(logPtr - LONG_SIZE);
+            logPtr = raf.readLong();
+        }
+        // restore
+        raf.seek(currentOffset);
     }
 
     /** Shutdown the logging system, writing out whatever state
@@ -492,8 +545,148 @@ public class LogFile {
     public void recover() throws IOException {
         synchronized (Database.getBufferPool()) {
             synchronized (this) {
-                recoveryUndecided = false;
+                this.recoveryUndecided = false;
                 // some code goes here
+                currentOffset = raf.length();
+                if (currentOffset - LONG_SIZE > 0) {
+                    // raf.seek(raf.getFilePointer() - LONG_SIZE);
+                    // long iter = raf.readLong();
+                    // start of the log file;
+                    raf.seek(currentOffset - LONG_SIZE);
+                    long iter = raf.readLong();
+
+                    raf.seek(0);
+                    long lastCheckPoint = raf.readLong();
+                    if (lastCheckPoint == -1L) {
+                        // No checkpoint
+                        lastCheckPoint = LONG_SIZE;
+                    }
+
+                    Set<Long> transactions = new HashSet<>();
+                    Set<Long> commits = new HashSet<>();
+                    // find check point
+                    // analyse stage
+
+                    // backward start from last record
+                    while (iter >= lastCheckPoint) {
+                        raf.seek(iter);
+                        int type = raf.readInt();
+                        long record_tid;
+                        switch (type) {
+                            case UPDATE_RECORD:
+                                break;
+                            case ABORT_RECORD:
+                                break;
+                            case COMMIT_RECORD:
+                                record_tid = raf.readLong();
+                                commits.add(record_tid);
+                                break;
+                            case BEGIN_RECORD:
+                                record_tid = raf.readLong();
+                                transactions.add(record_tid);
+                                break;
+                            case CHECKPOINT_RECORD:
+                                // checkPoint = iter;
+                                assert lastCheckPoint == iter;
+                                // format
+                                raf.seek(raf.getFilePointer() + LONG_SIZE);
+
+                                int numActiveTransactions = raf.readInt();
+                                for (int i = 0; i < numActiveTransactions; ++i) {
+                                    // add active transactions
+                                    record_tid = raf.readLong();
+                                    long first_pos = raf.readLong();
+                                    transactions.add(record_tid);
+                                    tidToFirstLogRecord.put(record_tid, first_pos);
+                                }
+                                break;
+                            default:
+                                System.out.print(iter);
+                                System.out.println("myType: " + type);
+                                throw new IOException("analysis");
+                        }
+                        // assume log are correct
+                        if (iter > LONG_SIZE) {
+                            raf.seek(iter - LONG_SIZE);
+                            iter = raf.readLong();
+                        } else {
+                            iter = -1;
+                        }
+                    }
+
+                    // redo
+                    // forward direction start from last checkpoint
+                    iter = lastCheckPoint;
+                    while (iter < currentOffset) {
+                        // System.out.println(iter);
+                        raf.seek(iter);
+                        int type = raf.readInt();
+                        long record_tid;
+                        switch (type) {
+                            case UPDATE_RECORD:
+                                // redo
+                                // raf.readInt();
+                                raf.seek(raf.getFilePointer() + LONG_SIZE);
+                                Page before = this.readPageData(raf);
+                                Page after = this.readPageData(raf);
+                                Database.getCatalog().getDatabaseFile(after.getId().getTableId()).writePage(after);
+                                Database.getBufferPool().discardPage(after.getId());
+
+                                iter = raf.getFilePointer();
+                                break;
+                            case ABORT_RECORD:
+                                // redo
+                                record_tid = raf.readLong();
+                                if (tidToFirstLogRecord.get(record_tid) == null) {
+                                    throw new IOException("ABORT: transaction " + record_tid + "is not live");
+                                }
+
+                                // #####################
+                                iter = raf.getFilePointer();
+                                // must before roollbackInternal
+
+                                rollbackInternal(record_tid);
+                                transactions.remove(record_tid);
+                                break;
+                            case COMMIT_RECORD:
+                                // nothing;
+                                record_tid = raf.readLong();
+                                // raf.seek(raf.getFilePointer() + LONG_SIZE);
+                                tidToFirstLogRecord.remove(record_tid);
+                                iter = raf.getFilePointer();
+                                break;
+                            case BEGIN_RECORD:
+                                // nothing;
+                                record_tid = raf.readLong();
+                                tidToFirstLogRecord.put(record_tid, iter);
+                                iter = raf.getFilePointer();
+                                // raf.seek(raf.getFilePointer() + INT_SIZE);
+                                break;
+                            case CHECKPOINT_RECORD:
+                                // do nothing
+                                assert lastCheckPoint == iter;
+                                // format
+                                raf.seek(raf.getFilePointer() + LONG_SIZE);
+
+                                int numActiveTransactions = raf.readInt();
+                                iter = raf.getFilePointer() + numActiveTransactions * LONG_SIZE * 2;
+                                break;
+                            default:
+                                System.out.println("type: " + type);
+                                throw new IOException("analysis");
+                        }
+                        // skip the offset  to next log record ()
+                        iter += LONG_SIZE;
+                    }
+
+                    // undo
+                    for (Long tid : transactions) {
+                        if (!commits.contains(tid)) {
+                            assert tidToFirstLogRecord.containsKey(tid);
+                            rollbackInternal(tid);
+                        }
+                    }
+                }
             }
          }
     }

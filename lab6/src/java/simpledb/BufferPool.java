@@ -373,6 +373,7 @@ public class BufferPool {
                     if (commit) {
                         flushPage(pg.getId());
                         pg.setBeforeImage();
+                        //TODO commit log ?????
                     } else if (pg.isDirty() != null){
                         // all dirty pages are flushed and not dirty page are still in cache
                         // discard
